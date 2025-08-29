@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Event Setup</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Plan Your Event</h1>
+
+    <!-- Event Name -->
+    <label for="eventName" style="color:white;">Event Name:</label>
+    <input type="text" id="eventName" placeholder="Enter event name" />
+
+    <!-- Theme Selection -->
+    <h2>Select a Theme</h2>
+
+    <div class="theme-card">
+      <img src="garden.jpg" alt="Garden Theme" />
+      <p>Garden Theme - ₹5000</p>
+      <button onclick="selectTheme('Garden', 5000)">Choose</button>
+    </div>
+
+    <div class="theme-card">
+      <img src="beach.jpg" alt="Beach Theme" />
+      <p>Beach Theme - ₹7000</p>
+      <button onclick="selectTheme('Beach', 7000)">Choose</button>
+    </div>
+
+    <div class="theme-card">
+      <img src="royal.jpg" alt="Royal Palace Theme" />
+      <p>Royal Palace - ₹9000</p>
+      <button onclick="selectTheme('Royal Palace', 9000)">Choose</button>
+    </div>
+
+    <div class="theme-card">
+      <img src="rustic.jpg" alt="Rustic Barn Theme" />
+      <p>Rustic Barn - ₹6000</p>
+      <button onclick="selectTheme('Rustic Barn', 6000)">Choose</button>
+    </div>
+
+    <div class="theme-card">
+      <img src="chick.jpg" alt="Modern Chic Theme" />
+      <p>Modern Chic - ₹7500</p>
+      <button onclick="selectTheme('Modern Chic', 7500)">Choose</button>
+    </div>
+
+    <div class="theme-card">
+      <img src="fairy.jpg" alt="Fairy Tale Theme" />
+      <p>Fairy Tale - ₹8500</p>
+      <button onclick="selectTheme('Fairy Tale', 8500)">Choose</button>
+    </div>
+
+    <!-- Selected Theme Preview -->
+    <div id="preview" class="preview-card" style="display: none;">
+      <h3>Selected Theme Preview</h3>
+      <img id="previewImage" src="" alt="Selected Theme" />
+      <p id="previewName"></p>
+      <p id="previewCost"></p>
+    </div>
+
+    <!-- Proceed -->
+    <button onclick="goToFoodPage()">Next: Select Food</button>
+  </div>
+
+  <script>
+    let selectedTheme = null;
+    let themeCost = 0;
+
+    function selectTheme(name, cost) {
+      selectedTheme = name;
+      themeCost = cost;
+      alert(`Selected Theme: ${name}`);
+
+      // Update preview
+      document.getElementById("preview").style.display = "block";
+      document.getElementById("previewName").textContent = `Theme: ${name}`;
+      document.getElementById("previewCost").textContent = `Cost: ₹${cost}`;
+
+      const imageMap = {
+        "Garden": "garden.jpg",
+        "Beach": "beach.jpg",
+        "Royal Palace": "royal.jpg",
+        "Rustic Barn": "rustic.jpg",
+        "Modern Chic": "chick.jpg",
+        "Fairy Tale": "fairy.jpg"
+      };
+
+      document.getElementById("previewImage").src = imageMap[name];
+    }
+
+    function goToFoodPage() {
+      const eventName = document.getElementById("eventName").value.trim();
+      if (!eventName || !selectedTheme) {
+        alert("Please enter event name and select a theme.");
+        return;
+      }
+
+      localStorage.setItem("eventName", eventName);
+      localStorage.setItem("themeName", selectedTheme);
+      localStorage.setItem("themeCost", themeCost);
+
+      window.location.href = "food.html";
+    }
+  </script>
+</body>
+</html>

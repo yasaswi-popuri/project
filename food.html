@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Food Selection</title>
+  <style>
+    /* Reset & Base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-image: url('back.png');
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      color: #333;
+      padding: 30px;
+    }
+
+    /* Container */
+    .container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 25px 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+    }
+
+    /* Headings */
+    h1 {
+      font-size: 28px;
+      margin-bottom: 10px;
+      color: #2c3e50;
+    }
+    h2 {
+      margin-top: 30px;
+      font-size: 22px;
+      color: #34495e;
+    }
+    h3 {
+      margin-top: 20px;
+      font-size: 20px;
+      color: #555;
+    }
+
+    /* Buttons */
+    button {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      padding: 10px 18px;
+      margin: 8px 5px 15px 0;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    /* Food Items */
+    .food-item {
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      align-items: center;
+      font-size: 16px;
+    }
+
+    .food-item input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
+    }
+
+    /* Form Elements */
+    label[for="guestCount"] {
+      display: block;
+      margin-top: 20px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      padding: 6px;
+      margin-top: 5px;
+      width: 80px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    /* Output */
+    #totalOutput {
+      margin-top: 20px;
+      font-size: 16px;
+      background: #ecf0f1;
+      padding: 10px;
+      border-radius: 5px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Food Menu for: <span id="eventTitle"></span></h1>
+    <p>Selected Theme: <strong id="themeName"></strong> (₹<span id="themeCost"></span>)</p>
+
+    <h2>Select Cuisine</h2>
+    <button onclick="renderFood('indian')">Indian</button>
+    <button onclick="renderFood('continental')">Continental</button>
+    <button onclick="renderFood('custom')">Custom Snacks</button>
+
+    <div id="foodList"></div>
+
+    <label for="guestCount">Total Guests:</label>
+    <input type="number" id="guestCount" min="1" value="1" />
+
+    <button onclick="calculateTotal()">Calculate Total</button>
+    <p id="totalOutput"></p>
+  </div>
+
+  <script>
+    const eventTitle = localStorage.getItem("eventName") || "My Event";
+    const themeName = localStorage.getItem("themeName") || "Classic";
+    const themeCost = parseInt(localStorage.getItem("themeCost")) || 5000;
+
+    document.getElementById("eventTitle").textContent = eventTitle;
+    document.getElementById("themeName").textContent = themeName;
+    document.getElementById("themeCost").textContent = themeCost;
+
+    const foodOptions = {
+      indian: [
+        { name: "Masala Dosa", price: 120 },
+        { name: "Idli Sambar", price: 100 },
+        { name: "Chicken Curry", price: 180 },
+        { name: "Vegetable Upma", price: 90 },
+        { name: "Pulihora", price: 100 },
+        { name: "Rasam with Rice", price: 80 },
+        { name: "Paneer Butter Masala", price: 150 },
+        { name: "Chicken Biryani", price: 200 },
+        { name: "Chole Bhature", price: 140 },
+        { name: "Gulab Jamun", price: 50 },
+        { name: "Rajma Chawal", price: 130 }
+      ],
+      continental: [
+        { name: "Pasta Alfredo", price: 180 },
+        { name: "Grilled Chicken", price: 220 },
+        { name: "Caesar Salad", price: 100 },
+        { name: "Garlic Bread", price: 80 },
+        { name: "Thai Green Curry", price: 200 },
+        { name: "Sushi Rolls", price: 250 },
+        { name: "Bibimbap", price: 230 },
+        { name: "Hakka Noodles", price: 160 },
+        { name: "Teriyaki Chicken", price: 210 },
+        { name: "Spring Rolls", price: 90 }
+      ],
+      custom: [
+        { name: "Veg Sandwich", price: 80 },
+        { name: "Fruit Bowl", price: 120 },
+        { name: "Mini Pizza", price: 150 },
+        { name: "Stuffed Croissants", price: 130 },
+        { name: "Cheese Balls", price: 100 },
+        { name: "Nachos with Salsa", price: 110 },
+        { name: "Mini Quiches", price: 140 },
+        { name: "Mozzarella Sticks", price: 120 },
+        { name: "Chocolate Brownies", price: 90 },
+        { name: "Cold Coffee Shots", price: 70 }
+      ]
+    };
+
+    let selectedItems = [];
+
+    function renderFood(cuisine) {
+      selectedItems = [];
+      const list = document.getElementById("foodList");
+      list.innerHTML = `<h3>${cuisine.charAt(0).toUpperCase() + cuisine.slice(1)} Menu</h3>`;
+
+      foodOptions[cuisine].forEach((item) => {
+        const label = document.createElement("label");
+        label.className = "food-item";
+        label.innerHTML = `
+          <input type="checkbox" value="${item.price}" onchange="toggleItem('${item.name}', ${item.price}, this.checked)">
+          ${item.name} - ₹${item.price}
+        `;
+        list.appendChild(label);
+      });
+    }
+
+    function toggleItem(name, price, isChecked) {
+      if (isChecked) {
+        selectedItems.push({ name, price });
+      } else {
+        selectedItems = selectedItems.filter(i => i.name !== name);
+      }
+    }
+
+    function calculateTotal() {
+      const guests = parseInt(document.getElementById("guestCount").value);
+      const perGuestTotal = selectedItems.reduce((sum, item) => sum + item.price, 0);
+      const totalFoodCost = perGuestTotal * guests;
+      const grandTotal = themeCost + totalFoodCost;
+
+      document.getElementById("totalOutput").textContent =
+        `Food Cost: ₹${perGuestTotal} × ${guests} guests = ₹${totalFoodCost}
+Theme Cost: ₹${themeCost}
+Grand Total: ₹${grandTotal}`;
+    }
+  </script>
+</body>
+</html>
